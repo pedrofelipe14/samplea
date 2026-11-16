@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sampleá · editor</title>
+  <link rel="icon" href="../icons/icon32.png" />
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="editor.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="../icons/icon32.png" alt="" width="24" height="24" /><b>sampleá</b></div>
+    <span class="muted top-tip">tocá el ícono de la extensión en cualquier pestaña para grabar · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></span>
+  </header>
+
+  <div class="layout">
+    <aside class="library">
+      <div class="lib-head">
+        <h2>grabaciones</h2>
+        <label class="import" title="Abrir un archivo de audio para cortarlo">
+          + abrir archivo<input id="import" type="file" accept="audio/*" hidden />
+        </label>
+      </div>
+      <ul id="list" class="list"></ul>
+    </aside>
+
+    <main id="editor" class="editor">
+      <section id="empty" class="empty" hidden>
+        <div class="empty-dot"></div>
+        <h1>todavía no grabaste nada</h1>
+        <ol>
+          <li>Andá a la pestaña donde suena lo que querés samplear (YouTube, Bandcamp, SoundCloud, lo que sea).</li>
+          <li>Tocá el ícono de <b>sampleá</b> en la barra del navegador y apretá el botón rojo.</li>
+          <li>Cuando pares, la grabación se abre acá para recortarla y bajarla en WAV.</li>
+        </ol>
+        <p class="muted">También podés soltar un archivo de audio en esta página.</p>
+      </section>
+
+      <section id="work" hidden>
+        <div class="title-row">
+          <input id="title" class="title" type="text" spellcheck="false" aria-label="Nombre del sample" />
+          <span id="info" class="info muted"></span>
+          <span id="saved" class="saved muted"></span>
+        </div>
+
+        <div class="wave-wrap">
+          <canvas id="ruler" class="ruler"></canvas>
+          <canvas id="wave" class="wave"></canvas>
+          <canvas id="overview" class="overview" title="Arrastrá para moverte por la grabación"></canvas>
+        </div>
+
+        <div class="bar transport">
+          <button id="play" class="play" title="Reproducir / parar (Espacio)" aria-label="Reproducir"><span class="ico-play"></span></button>
+          <button id="loop" class="toggle" title="Repetir la selección (L)">loop</button>
+          <div class="readout">
+            <div><span>posición</span><b id="pos" class="mono">0:00.000</b></div>
+            <div><span>inicio</span><b id="sel-a" class="mono">—</b></div>
+            <div><span>fin</span><b id="sel-b" class="mono">—</b></div>
+            <div><span>largo</span><b id="sel-len" class="mono">—</b></div>
+          </div>
+          <label class="bpm" title="Para saber cuántos tiempos dura la selección">
+            <input id="bpm" type="number" min="40" max="300" step="0.1" value="120" /> bpm
+            <b id="beats" class="mono muted"></b>
+          </label>
+        </div>
+
+        <div class="bar tools">
+          <div class="group">
+            <button data-op="all" title="Seleccionar todo (Ctrl+A)">todo</button>
+            <button data-op="crop" title="Quedarse solo con la selección (C)">recortar</button>
+            <button data-op="delete" title="Borrar la selección (Supr)">borrar</button>
+          </div>
+          <div class="group">
+            <button data-op="normalize" title="Subir el volumen al máximo sin saturar (N)">normalizar</button>
+            <button data-op="fadein" title="Fade de entrada en la selección">fade in</button>
+            <button data-op="fadeout" title="Fade de salida en la selección">fade out</button>
+            <button data-op="reverse" title="Dar vuelta la selección (R)">invertir</button>
+          </div>
+          <div class="group">
+            <button data-op="undo" title="Deshacer (Ctrl+Z)">↶</button>
+            <button data-op="redo" title="Rehacer (Ctrl+Shift+Z)">↷</button>
+          </div>
+          <label class="check" title="Ajusta los bordes de la selección al cruce por cero más cercano: evita los clicks al cortar"><input id="zc" type="checkbox" checked /> cortes sin click</label>
+        </div>
+
+        <div class="bar export">
+          <select id="bits" title="Formato del WAV">
+            <option value="16">WAV 16-bit</option>
+            <option value="24" selected>WAV 24-bit</option>
+            <option value="32">WAV 32-bit float</option>
+          </select>
+          <button id="download" class="primary">bajar <span id="dl-what">todo</span> en WAV</button>
+          <button id="save-cut" title="Guarda la selección como un sample aparte en la biblioteca">guardar recorte</button>
+          <div id="drag" class="drag" draggable="true" title="Arrastrá esto a tu DAW o a una carpeta">⠿ arrastrá a tu DAW</div>
+        </div>
+
+        <p class="keys muted">
+          <kbd>Espacio</kbd> play · <kbd>L</kbd> loop · arrastrá para seleccionar · <kbd>Shift</kbd>+click extiende ·
+          rueda = zoom · <kbd>Shift</kbd>+rueda = moverse · <kbd>Z</kbd> zoom a la selección · <kbd>0</kbd> ver todo · <kbd>Esc</kbd> deseleccionar
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <div id="drop" class="drop" hidden><p>soltá el audio para abrirlo</p></div>
+  <div id="toast" class="toast" role="status"></div>
+  <script type="module" src="editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Sampleá</title>
+  <link rel="stylesheet" href="theme.css" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="pop-head">
+    <img src="../icons/icon32.png" alt="" width="22" height="22" />
+    <b>sampleá</b>
+    <button id="library" class="link" type="button" title="Abrir tus grabaciones">biblioteca →</button>
+  </header>
+
+  <main class="pop">
+    <p id="tab" class="tab-title"></p>
+
+    <button id="rec" class="rec-btn" type="button" aria-label="Grabar">
+      <span class="rec-dot"></span>
+    </button>
+    <p id="label" class="rec-label">grabar esta pestaña</p>
+
+    <div class="meter" aria-hidden="true"><div id="meter-fill"></div></div>
+    <p id="time" class="time">0:00.0</p>
+
+    <p id="msg" class="msg"></p>
+  </main>
+
+  <footer class="pop-foot">
+    La pestaña se sigue escuchando mientras grabás. Se graba sin pérdida, hasta 10 minutos.
+  </footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

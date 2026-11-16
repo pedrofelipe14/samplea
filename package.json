@@ -1,0 +1,13 @@
+{
+  "name": "samplea",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Extensión de navegador para grabar el audio de una pestaña y recortar samples en WAV.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "icons": "node scripts/icons.mjs",
+    "zip": "node scripts/zip.mjs"
+  }
+}
