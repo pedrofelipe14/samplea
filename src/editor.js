@@ -161,7 +161,11 @@ function openFirst() {
 
 function renderInfo() {
   const n = frames();
-  $('#info').textContent = `${fmtTime(n / st.sr)} · ${(st.sr / 1000).toFixed(1).replace('.0', '')} kHz · ${st.ch.length === 1 ? 'mono' : 'estéreo'}`;
+  let src = '';
+  try {
+    if (/^https?:/.test(st.meta.url)) src = ` · <a href="${esc(st.meta.url)}" target="_blank" rel="noopener" title="${esc(st.meta.url)}">fuente: ${esc(new URL(st.meta.url).hostname.replace(/^www\./, ''))} ↗</a>`;
+  } catch {}
+  $('#info').innerHTML = `${fmtTime(n / st.sr)} · ${(st.sr / 1000).toFixed(1).replace('.0', '')} kHz · ${st.ch.length === 1 ? 'mono' : 'estéreo'}${src}`;
 }
 
 /* ---------- resumen de la onda (para dibujar rápido archivos largos) ---------- */
@@ -377,6 +381,7 @@ function drawOverview() {
 }
 
 function renderReadout() {
+  if (!st.ch) return;
   const pp = playPos();
   $('#pos').textContent = fmtTime((pp ?? (st.sel ? st.sel.a : st.cursor)) / st.sr);
   const s = st.sel;
@@ -390,6 +395,12 @@ function renderReadout() {
     const nearBars = Math.abs(bars - Math.round(bars)) < 0.03 && Math.round(bars) > 0;
     $('#beats').textContent = `= ${beats.toFixed(2)} tiempos${nearBars ? ` · ${Math.round(bars)} ${Math.round(bars) === 1 ? 'compás' : 'compases'}` : ''}`;
   } else $('#beats').textContent = '';
+  const [ra, rb] = s ? [s.a, s.b] : [0, frames()];
+  if (!st.play) {
+    const db = dsp.peakDb(st.ch, ra, rb);
+    $('#peak').textContent = Number.isFinite(db) ? `${db.toFixed(1)} dB` : '−∞';
+    $('#peak').classList.toggle('hot', db > -0.1);
+  }
   $('#dl-what').textContent = s ? 'la selección' : 'todo';
   $('#save-cut').disabled = !s;
   $('#play').classList.toggle('on', !!st.play);
@@ -471,8 +482,14 @@ wave.addEventListener('pointerdown', (e) => {
   drawAll();
 });
 
+wave.addEventListener('pointerleave', () => { $('#hover').hidden = true; });
 wave.addEventListener('pointermove', (e) => {
   if (!st.ch) return;
+  const hr = wave.getBoundingClientRect();
+  const hv = $('#hover');
+  hv.hidden = false;
+  hv.textContent = fmtTime(xToFrame(e.clientX) / st.sr);
+  hv.style.left = `${Math.min(e.clientX - hr.left, hr.width - 90)}px`;
   if (!drag) {
     wave.classList.toggle('edge', !!edgeAt(e.clientX));
     return;
@@ -700,8 +717,15 @@ $('#title').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target
 /* ---------- exportar ---------- */
 function wavBlob() {
   const [a, b] = range();
-  const ch = dsp.crop(st.ch, a, b);
-  return new Blob([encodeWav(ch, st.sr, +$('#bits').value)], { type: 'audio/wav' });
+  let ch = dsp.crop(st.ch, a, b);
+  if ($('#chans').value === 'mono') ch = dsp.mixdown(ch);
+  const rate = +$('#rate').value || st.sr;
+  if (rate !== st.sr) ch = dsp.resample(ch, st.sr, rate);
+  return new Blob([encodeWav(ch, rate, +$('#bits').value)], { type: 'audio/wav' });
+}
+for (const id of ['bits', 'rate', 'chans']) {
+  $(`#${id}`).value = store.get(`sa:${id}`, $(`#${id}`).value);
+  $(`#${id}`).addEventListener('change', (e) => store.set(`sa:${id}`, e.target.value));
 }
 const fileName = () => `${slug($('#title').value)}${st.sel ? '-recorte' : ''}.wav`;
 
@@ -715,6 +739,7 @@ $('#download').addEventListener('click', () => {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
+  toast(`Bajado: ${a.download}`);
 });
 
 $('#drag').addEventListener('dragstart', (e) => {
@@ -738,6 +763,42 @@ $('#save-cut').addEventListener('click', async () => {
   toast('Recorte guardado en la biblioteca');
   return meta;
 });
+
+let taps = [];
+function tap() {
+  const now = performance.now();
+  if (taps.length && now - taps[taps.length - 1] > 2000) taps = [];
+  taps.push(now);
+  taps = taps.slice(-8);
+  const b = $('#tap');
+  b.classList.add('flash');
+  setTimeout(() => b.classList.remove('flash'), 90);
+  if (taps.length >= 3) {
+    const avg = (taps[taps.length - 1] - taps[0]) / (taps.length - 1);
+    let bpm = 60000 / avg;
+    while (bpm < 70) bpm *= 2;
+    while (bpm > 180) bpm /= 2;
+    $('#bpm').value = bpm.toFixed(1);
+    store.set('sa:bpm', +$('#bpm').value);
+    renderReadout();
+  }
+}
+function fitToTempo() {
+  if (!st.sel) return toast('Primero seleccioná una parte arrastrando sobre la onda.');
+  const bpm = +$('#bpm').value;
+  if (!(bpm > 0)) return;
+  const beats = ((st.sel.b - st.sel.a) / st.sr) * (bpm / 60);
+  const target = dsp.musicalBeats(beats);
+  const len = Math.round((target * 60 * st.sr) / bpm);
+  if (st.sel.a + len > frames()) return toast('No alcanza el audio para ese largo desde el inicio de la selección.');
+  st.sel = { a: st.sel.a, b: st.sel.a + len };
+  if (st.play) play();
+  drawAll();
+  const bars = target / 4;
+  toast(target >= 4 ? `Selección: ${bars} ${bars === 1 ? 'compás' : 'compases'} a ${bpm} bpm` : `Selección: ${target} ${target === 1 ? 'tiempo' : 'tiempos'} a ${bpm} bpm`);
+}
+$('#tap').addEventListener('click', tap);
+$('#fit').addEventListener('click', fitToTempo);
 
 $('#bpm').value = store.get('sa:bpm', 120);
 $('#bpm').addEventListener('input', () => { store.set('sa:bpm', +$('#bpm').value); renderReadout(); });
@@ -783,7 +844,7 @@ window.addEventListener('drop', (e) => {
 
 /* ---------- teclado ---------- */
 document.addEventListener('keydown', (e) => {
-  if (e.target.closest('input, select, textarea') || !st.ch) return;
+  if (e.target.closest?.('input, select, textarea') || !st.ch) return;
   const k = e.key.toLowerCase();
   const mod = e.ctrlKey || e.metaKey;
   if (k === ' ') { e.preventDefault(); st.play ? stop() : play(); }
@@ -792,6 +853,8 @@ document.addEventListener('keydown', (e) => {
   else if (mod && k === 'a') { e.preventDefault(); OPS.all(); }
   else if (mod) return;
   else if (k === 'l') toggleLoop();
+  else if (k === 't') tap();
+  else if (k === 'b') fitToTempo();
   else if (k === 'delete' || k === 'backspace') { e.preventDefault(); OPS.delete(); }
   else if (k === 'c') OPS.crop();
   else if (k === 'n') OPS.normalize();
@@ -806,6 +869,11 @@ document.addEventListener('keydown', (e) => {
 
 /* ---------- inicio ---------- */
 window.addEventListener('hashchange', () => open(location.hash.slice(1)));
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible') return;
+  await refreshList();
+  if (!st.meta) openFirst();
+});
 await refreshList();
 if (location.hash.length > 1) await open(location.hash.slice(1));
 else openFirst();

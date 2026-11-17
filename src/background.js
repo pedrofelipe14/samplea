@@ -25,8 +25,22 @@ async function setBadge(on) {
   if (on) await chrome.action.setBadgeBackgroundColor({ color: '#e5322d' });
 }
 
-function openEditor(id) {
-  return chrome.tabs.create({ url: chrome.runtime.getURL(`src/editor.html${id ? `#${id}` : ''}`) });
+/** Abre el editor; si ya hay una pestaña del editor abierta, la reusa. */
+async function openEditor(id) {
+  const base = chrome.runtime.getURL('src/editor.html');
+  const url = id ? `${base}#${id}` : base;
+  const open = await chrome.runtime.getContexts({ contextTypes: ['TAB'] });
+  const ctx = open.find((c) => c.documentUrl?.startsWith(base) && c.tabId >= 0);
+  if (ctx) {
+    try {
+      const tab = await chrome.tabs.update(ctx.tabId, { active: true, ...(id ? { url } : {}) });
+      await chrome.windows.update(tab.windowId, { focused: true });
+      return tab;
+    } catch {
+      // la pestaña se cerró justo: abrimos una nueva
+    }
+  }
+  return chrome.tabs.create({ url });
 }
 
 async function handle(msg) {
@@ -60,6 +74,11 @@ async function handle(msg) {
       const res = await toOffscreen({ type: 'stop' });
       await finish(res);
       return res;
+    }
+    case 'discard': {
+      if (await hasOffscreen()) await toOffscreen({ type: 'discard' });
+      await finish(null);
+      return { recording: false };
     }
     case 'finished': // el offscreen terminó solo (se cerró la pestaña o llegó al límite)
       await finish(msg);

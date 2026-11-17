@@ -45,6 +45,7 @@
         </div>
 
         <div class="wave-wrap">
+          <span id="hover" class="hover-time mono" hidden></span>
           <canvas id="ruler" class="ruler"></canvas>
           <canvas id="wave" class="wave"></canvas>
           <canvas id="overview" class="overview" title="Arrastrá para moverte por la grabación"></canvas>
@@ -58,11 +59,14 @@
             <div><span>inicio</span><b id="sel-a" class="mono">—</b></div>
             <div><span>fin</span><b id="sel-b" class="mono">—</b></div>
             <div><span>largo</span><b id="sel-len" class="mono">—</b></div>
+            <div><span>pico</span><b id="peak" class="mono">—</b></div>
           </div>
-          <label class="bpm" title="Para saber cuántos tiempos dura la selección">
-            <input id="bpm" type="number" min="40" max="300" step="0.1" value="120" /> bpm
+          <div class="bpm">
+            <input id="bpm" type="number" min="40" max="300" step="0.1" value="120" aria-label="Tempo en BPM" title="Tempo, para saber cuántos tiempos dura la selección" /> bpm
+            <button id="tap" type="button" title="Tocá al ritmo de la música para medir el tempo (T)">tap</button>
+            <button id="fit" type="button" title="Ajusta el largo de la selección a compases (o tiempos) exactos a este tempo, para que el loop cierre perfecto (B)">encajar</button>
             <b id="beats" class="mono muted"></b>
-          </label>
+          </div>
         </div>
 
         <div class="bar tools">
@@ -85,10 +89,19 @@
         </div>
 
         <div class="bar export">
-          <select id="bits" title="Formato del WAV">
-            <option value="16">WAV 16-bit</option>
-            <option value="24" selected>WAV 24-bit</option>
-            <option value="32">WAV 32-bit float</option>
+          <select id="bits" title="Resolución del WAV">
+            <option value="16">16-bit</option>
+            <option value="24" selected>24-bit</option>
+            <option value="32">32-bit float</option>
+          </select>
+          <select id="rate" title="Frecuencia de muestreo del archivo">
+            <option value="0" selected>frecuencia original</option>
+            <option value="44100">44,1 kHz</option>
+            <option value="48000">48 kHz</option>
+          </select>
+          <select id="chans" title="Canales">
+            <option value="stereo" selected>estéreo</option>
+            <option value="mono">mono</option>
           </select>
           <button id="download" class="primary">bajar <span id="dl-what">todo</span> en WAV</button>
           <button id="save-cut" title="Guarda la selección como un sample aparte en la biblioteca">guardar recorte</button>
@@ -97,7 +110,7 @@
 
         <p class="keys muted">
           <kbd>Espacio</kbd> play · <kbd>L</kbd> loop · arrastrá para seleccionar · <kbd>Shift</kbd>+click extiende ·
-          rueda = zoom · <kbd>Shift</kbd>+rueda = moverse · <kbd>Z</kbd> zoom a la selección · <kbd>0</kbd> ver todo · <kbd>Esc</kbd> deseleccionar
+          rueda = zoom · <kbd>Shift</kbd>+rueda = moverse · <kbd>Z</kbd> zoom a la selección · <kbd>T</kbd> tap · <kbd>B</kbd> encajar · <kbd>0</kbd> ver todo · <kbd>Esc</kbd> deseleccionar
         </p>
       </section>
     </main>

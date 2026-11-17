@@ -132,3 +132,64 @@ export function trimSilence(ch, threshold = 0.002) {
   while (e > s && !loud(e - 1)) e--;
   return crop(ch, s, e);
 }
+
+/** Mezcla a mono (promedio de los canales). */
+export function mixdown(ch) {
+  if (ch.length === 1) return [ch[0].slice()];
+  const n = ch[0].length;
+  const out = new Float32Array(n);
+  for (const c of ch) for (let i = 0; i < n; i++) out[i] += c[i];
+  for (let i = 0; i < n; i++) out[i] /= ch.length;
+  return [out];
+}
+
+/**
+ * Cambia la frecuencia de muestreo con interpolación sinc con ventana (Blackman),
+ * con filtro antialias cuando se baja la frecuencia. Calidad de estudio para samples.
+ */
+export function resample(ch, from, to, taps = 24) {
+  if (from === to) return ch.map((c) => c.slice());
+  const ratio = to / from;
+  const n = ch[0].length;
+  const outLen = Math.max(1, Math.round(n * ratio));
+  const cutoff = Math.min(1, ratio) * 0.97; // un poco por debajo de Nyquist
+  const half = Math.ceil(taps / Math.min(1, ratio));
+  const sinc = (x) => (x === 0 ? 1 : Math.sin(Math.PI * x) / (Math.PI * x));
+  const win = (x) => { // Blackman en [-half, half]
+    const t = (x / half + 1) / 2;
+    return t <= 0 || t >= 1 ? 0 : 0.42 - 0.5 * Math.cos(2 * Math.PI * t) + 0.08 * Math.cos(4 * Math.PI * t);
+  };
+  return ch.map((c) => {
+    const out = new Float32Array(outLen);
+    for (let j = 0; j < outLen; j++) {
+      const pos = j / ratio;
+      const i0 = Math.floor(pos);
+      let acc = 0;
+      let norm = 0;
+      for (let k = i0 - half + 1; k <= i0 + half; k++) {
+        const d = pos - k;
+        const w = cutoff * sinc(cutoff * d) * win(d);
+        norm += w;
+        if (k >= 0 && k < n) acc += c[k] * w;
+      }
+      out[j] = norm ? acc / norm : 0;
+    }
+    return out;
+  });
+}
+
+/** Pico en dBFS (−Infinity si es silencio). */
+export function peakDb(ch, a, b) {
+  const p = peak(ch, a, b);
+  return p > 0 ? 20 * Math.log10(p) : -Infinity;
+}
+
+/**
+ * Largo "musical" más cercano para un loop: compases enteros si dura al menos
+ * 3 tiempos; si no, 1/4, 1/2, 1 o 2 tiempos. Devuelve la cantidad de tiempos.
+ */
+export function musicalBeats(beats) {
+  if (beats >= 3) return Math.max(4, Math.round(beats / 4) * 4);
+  const opts = [0.25, 0.5, 1, 2];
+  return opts.reduce((best, o) => (Math.abs(o - beats) < Math.abs(best - beats) ? o : best), opts[0]);
+}

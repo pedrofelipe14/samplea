@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sampleá · política de privacidad</title>
+  <link rel="icon" href="img/icon128.png" />
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; background: #0c0d0c; color: #ebeae4; font: 16px/1.65 system-ui, 'Segoe UI', Roboto, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 40px 24px 60px; }
+    a { color: #a6d86e; }
+    h1 { font-size: 34px; letter-spacing: -.03em; margin: 0 0 6px; }
+    h2 { font-size: 20px; margin: 30px 0 8px; }
+    .muted { color: #8d938b; }
+    li { margin: 6px 0; }
+    code { font-family: ui-monospace, Consolas, monospace; background: #1c1f1c; border-radius: 4px; padding: 1px 5px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p><a href="./">← sampleá</a></p>
+    <h1>Política de privacidad</h1>
+    <p class="muted">Última actualización: 16 de noviembre de 2026</p>
+
+    <p><b>En resumen: sampleá no recolecta, no guarda en ningún servidor y no comparte ningún dato tuyo.</b> Todo lo que hace pasa dentro de tu navegador.</p>
+
+    <h2>Qué hace con el audio</h2>
+    <ul>
+      <li>Solo graba cuando vos tocás el botón de grabar, y solo la pestaña en la que estás.</li>
+      <li>La grabación se guarda en el almacenamiento local de tu navegador (IndexedDB), en tu computadora.</li>
+      <li>El audio nunca se manda a internet. Sale de tu navegador únicamente cuando vos bajás o arrastrás un archivo WAV.</li>
+      <li>Podés borrar cualquier grabación desde la biblioteca del editor. Si desinstalás la extensión, el navegador borra todas.</li>
+    </ul>
+
+    <h2>Qué datos guarda</h2>
+    <ul>
+      <li>El audio que grabaste o abriste, el título y la dirección de la pestaña de donde salió (para mostrarte la fuente) y la fecha.</li>
+      <li>Tus preferencias del editor (tempo, formato de exportación, loop), en el almacenamiento local.</li>
+    </ul>
+    <p>Nada de eso sale de tu computadora.</p>
+
+    <h2>Qué no hace</h2>
+    <ul>
+      <li>No usa analíticas, cookies de seguimiento ni publicidad.</li>
+      <li>No lee el contenido de las páginas que visitás ni tu historial.</li>
+      <li>No se conecta a ningún servidor: no hace ninguna petición de red.</li>
+      <li>No vende ni comparte datos con nadie.</li>
+    </ul>
+
+    <h2>Permisos que pide</h2>
+    <ul>
+      <li><code>tabCapture</code>: para grabar el audio de la pestaña cuando apretás grabar.</li>
+      <li><code>offscreen</code>: un documento invisible que sigue grabando aunque cierres el popup.</li>
+      <li><code>unlimitedStorage</code>: para guardar grabaciones largas en tu biblioteca local.</li>
+    </ul>
+
+    <h2>Contacto</h2>
+    <p>Si tenés preguntas, abrí un issue en <a href="https://github.com/pedrofelipe14/samplea/issues">GitHub</a>. El código es abierto, así que podés revisar todo esto vos mismo.</p>
+  </main>
+</body>
+</html>

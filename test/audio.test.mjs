@@ -75,3 +75,29 @@ test('dsp: cruce por cero y silencio', () => {
   assert.equal(th.length, 12);
   assert.ok(th.every((v) => v > 0.4 && v <= 0.5));
 });
+
+test('dsp: mono, remuestreo y largo musical', () => {
+  const m = dsp.mixdown([Float32Array.from([1, 0]), Float32Array.from([0, 1])]);
+  assert.equal(m.length, 1);
+  assert.deepEqual([...m[0]], [0.5, 0.5]);
+
+  // un seno de 1 kHz a 48 kHz pasado a 44,1 kHz sigue siendo un seno de 1 kHz
+  const src = sine(48000, 1000, 48000, 0.8);
+  const [out] = dsp.resample([src], 48000, 44100);
+  assert.equal(out.length, 44100);
+  let err = 0;
+  for (let i = 1000; i < 43000; i += 7) err = Math.max(err, Math.abs(out[i] - 0.8 * Math.sin((2 * Math.PI * 1000 * i) / 44100)));
+  assert.ok(err < 0.002, `error ${err}`);
+  // un tono por encima del nuevo Nyquist (23 kHz) se filtra al bajar a 44,1 kHz
+  const [alias] = dsp.resample([sine(48000, 23000, 48000, 0.8)], 48000, 44100);
+  let pk = 0;
+  for (let i = 1000; i < 43000; i++) pk = Math.max(pk, Math.abs(alias[i]));
+  assert.ok(pk < 0.1, `alias ${pk}`);
+
+  assert.equal(dsp.musicalBeats(3.9), 4);
+  assert.equal(dsp.musicalBeats(7.6), 8);
+  assert.equal(dsp.musicalBeats(0.9), 1);
+  assert.equal(dsp.musicalBeats(1.6), 2);
+  assert.equal(dsp.musicalBeats(0.3), 0.25);
+  assert.ok(Math.abs(dsp.peakDb([Float32Array.from([0.5])]) + 6.02) < 0.01);
+});

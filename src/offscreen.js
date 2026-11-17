@@ -9,10 +9,15 @@ let startedAt = 0;
 let finishing = null;
 
 async function start({ streamId, title, url, tabId }) {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } },
-    video: false,
-  });
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } },
+      video: false,
+    });
+  } catch (e) {
+    throw new Error(`No pude acceder al audio de la pestaña (${e.message}). Probá recargarla y volver a intentar.`);
+  }
   rec = new Recorder({ maxSeconds: 600 });
   rec.onLimit = () => finishAndNotify();
   stream.getAudioTracks()[0].addEventListener('ended', () => finishAndNotify());
@@ -47,6 +52,14 @@ async function stop() {
   return finishing;
 }
 
+async function discard() {
+  if (rec) {
+    await rec.stop();
+    rec = null;
+  }
+  return { recording: false, discarded: true };
+}
+
 async function finishAndNotify() {
   const res = await stop();
   chrome.runtime.sendMessage({ target: 'bg', type: 'finished', ...res });
@@ -54,7 +67,7 @@ async function finishAndNotify() {
 
 chrome.runtime.onMessage.addListener((msg, _s, send) => {
   if (msg?.target !== 'offscreen') return false;
-  const run = { start: () => start(msg), stop, status: async () => status() }[msg.type];
+  const run = { start: () => start(msg), stop, discard, status: async () => status() }[msg.type];
   if (!run) return false;
   run().then(send, (e) => send({ error: e.message }));
   return true;

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sampleá",
   "short_name": "Sampleá",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Grabá el audio de cualquier pestaña sin pérdida de calidad, recortá el sample y bajalo en WAV. Todo pasa en tu navegador.",
   "minimum_chrome_version": "116",
   "action": {

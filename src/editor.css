@@ -91,3 +91,12 @@ input.title:focus { border-color: var(--accent); background: var(--panel); }
   .check { margin-left: 0; }
   .drag { margin-left: 0; }
 }
+
+.wave-wrap { position: relative; }
+.hover-time { position: absolute; top: 26px; z-index: 2; pointer-events: none; transform: translateX(6px); background: rgba(12, 13, 12, .85); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 11px; color: var(--text); }
+.info a { color: var(--accent); text-decoration: none; }
+.info a:hover { text-decoration: underline; }
+.bpm button { padding: 5px 10px; font-size: 12.5px; }
+#tap.flash { border-color: var(--accent); color: var(--accent); }
+.export select { padding: 8px 9px; }
+#peak.hot { color: #ff8a84; }
