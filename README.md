@@ -65,6 +65,10 @@ Los textos, las imágenes y los pasos para la Chrome Web Store y Edge Add-ons es
 
 Respetá los derechos de autor del material que sampleás.
 
+## Apoyar
+
+Si sampleá te sirve, podés invitarme un café: [Cafecito](https://cafecito.app/marchioripedro1) (pesos) · [Ko-fi](https://ko-fi.com/pedromarchiori) (dólares).
+
 ## Licencia
 
 MIT

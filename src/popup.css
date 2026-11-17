@@ -27,6 +27,9 @@ body { width: 300px; background: radial-gradient(260px 160px at 50% 0, rgba(166,
 
 .msg { min-height: 0; margin: 6px 0 0; font-size: 12px; text-align: center; }
 .msg.error { color: #ff8a84; }
+.pop-foot .donate { display: block; margin-top: 6px; }
+.pop-foot .donate a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.pop-foot .donate a:hover { text-decoration: underline; }
 .pop-foot { padding: 10px 14px 12px; border-top: 1px solid var(--line); margin-top: 8px; color: var(--muted); font-size: 11.5px; line-height: 1.4; }
 
 .discard { margin-top: 8px; font-size: 12px; }

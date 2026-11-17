@@ -14,6 +14,13 @@ kbd { font: 600 11px var(--mono); background: var(--panel-2); border: 1px solid 
 .lib-head h2 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
 .import { font-size: 12px; color: var(--accent); cursor: pointer; font-weight: 600; }
 .import:hover { text-decoration: underline; }
+.donate { margin: 22px 6px 4px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); font-size: 12px; color: var(--muted); line-height: 1.45; }
+.donate b { display: block; color: var(--text); font-size: 12.5px; margin-bottom: 2px; }
+.donate-links { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; }
+.donate-links a { flex: 1; text-align: center; white-space: nowrap; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--line); color: var(--text); text-decoration: none; font-weight: 600; }
+.donate-links a:first-child { background: var(--accent); border-color: var(--accent); color: #0d140a; }
+.donate-links a:hover { filter: brightness(1.1); border-color: var(--accent); }
+.donate-links small { font-weight: 500; opacity: .7; }
 .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .item { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 9px 10px 8px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
 .item:hover { background: var(--panel); }
